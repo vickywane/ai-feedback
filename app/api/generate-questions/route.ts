@@ -11,8 +11,7 @@ interface GenerateQuestionsRequest {
 export async function POST(request: NextRequest) {
   try {
     const body: GenerateQuestionsRequest = await request.json();
-    
-    const { formName, goal, context, numQuestions = 3 } = body;
+    const { formName, goal, context, numQuestions = 5 } = body;
     
     // Validate required fields
     if (!formName || !goal || !context) {

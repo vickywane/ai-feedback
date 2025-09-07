@@ -1,78 +1,67 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronDown, ChevronRight, Settings } from "lucide-react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-
-interface FormData {
-  formName: string
-  description: string
-  category: string
-  aiAgent: string
-  fields: {
-    name: string
-    email: string
-    company: string
-    message: string
-  },
-  goal: string;
-  context: string
-  questions?: string
-}
+import { FormData } from "@/app/new-form/page";
 
 interface QuestionsProps {
-  register: UseFormRegister<FormData>
-  errors: FieldErrors<FormData>
-  isRevealed: boolean
+  register: UseFormRegister<FormData>;
+  errors: FieldErrors<FormData>;
+  suggestions: string[] | null;
 }
 
-export default function Questions({ register, errors, isRevealed }: QuestionsProps) {
+export default function Questions({
+  register,
+  errors,
+  suggestions,
+}: QuestionsProps) {
+  const questionString = suggestions ? suggestions.join('\n') : '';
+
   return (
-    <Card className="relative">
-      <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+    <div>
+      <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center space-x-2">
-              <Settings className="w-5 h-5" />
-              <span>Questions</span>
-            </CardTitle>
-            <CardDescription>
-              Configure the questions for your form
-            </CardDescription>
+            <div className="flex items-center space-x-2">
+              <span>Form Questions</span>
+            </div>
+            <div className="mt-2 text-sm">Configure the questions for your form</div>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-4 relative">
-        {!isRevealed && (
+      <div className="space-y-4 relative">
+        {!suggestions && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-            <p className="text-muted-foreground">Complete the basic information to unlock questions</p>
+            <p className="text-muted-foreground">
+              Complete the basic information to unlock questions
+            </p>
           </div>
         )}
-        
-        <div className={`space-y-4 ${!isRevealed ? 'opacity-20' : ''}`}>
+
+        <div className={`space-y-3 ${!suggestions ? "opacity-20" : ""}`}>
           <div className="space-y-2">
-            <Label htmlFor="questions">Form Questions</Label>
-            <Textarea
+            <textarea
               id="questions"
-              placeholder="What questions would you like to include in your form?"
-              className="min-h-[120px]"
+              placeholder={questionString}
+              className={
+                "border-input h-[350px] bg-transparent focus-visible:border-ring w-full rounded-md border  px-6 py-4 text-base shadow-xs outline-none"
+              }
+
               {...register("questions")}
-              disabled={!isRevealed}
+              disabled={!suggestions}
             />
-            {errors.questions && <p className="text-sm text-destructive">{errors.questions.message}</p>}
+            {errors.questions && (
+              <p className="text-sm text-destructive">
+                {errors.questions.message}
+              </p>
+            )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

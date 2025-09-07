@@ -1,203 +1,136 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import {
-  Bot,
-  BarChart3,
-  FileText,
-  Users,
-  Zap,
-  Save,
-  Eye,
-} from "lucide-react"
-import Questions from "@/components/questions"
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import FormCard from "@/components/FormCard";
+import { Plus, FileText } from "lucide-react";
+import Link from "next/link";
+import toast, { Toaster } from "react-hot-toast";
 
 interface FormData {
-  formName: string
-  description: string
-  category: string
-  aiAgent: string
-  fields: {
-    name: string
-    email: string
-    company: string
-    message: string
-  },
-
+  id: string;
+  name: string;
   goal: string;
-  context: string
+  context: string;
+  agent_id: string | null;
+  created_at: string;
+  created_by: string;
 }
 
-export default function Dashboard() {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    basic: true,
-    fields: false,
-    ai: false,
-    settings: false,
-  })
+export default function FormsPage() {
+  const [forms, setForms] = useState<FormData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<FormData>({
-    defaultValues: {
-      formName: "",
-      description: "",
-      category: "",
-      aiAgent: "",
-      fields: {
-        name: "",
-        email: "",
-        company: "",
-        message: "",
-      },
+  const fetchForms = async () => {
+    if (!user?.id) return;
 
-      goal: "",
-      context: "",
-    },
-  })
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/forms?user_id=${user.id}`);
+      const data = await response.json();
 
-  const toggleSection = (section: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }))
-  }
+      if (data.success) {
+        setForms(data.forms);
+      } else {
+        toast.error("Failed to fetch forms");
+      }
+    } catch (error) {
+      console.error("Error fetching forms:", error);
+      toast.error("Error loading forms");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form data:", data)
-    // Handle form submission
+  useEffect(() => {
+    fetchForms();
+  }, [user?.id]);
+
+  const handleEdit = (formId: string) => {
+    toast.success(`Editing form ${formId} (feature coming soon)`);
+  };
+
+  const handleDelete = async (formId: string) => {
+    if (!window.confirm("Are you sure you want to delete this form?")) {
+      return;
+    }
+    
+    toast.success(`Deleting form ${formId} (feature coming soon)`);
+  };
+
+  const handlePreview = (formId: string) => {
+    toast.success(`Previewing form ${formId} (feature coming soon)`);
+  };
+
+  if (isLoading) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-background">
+          <Header />
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent"></div>
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Bot className="h-8 w-8 text-accent" />
-              <span className="text-xl font-bold">FormAI Dashboard</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                <Eye className="w-4 h-4 mr-2" />
-                Preview
-              </Button>
-              <Button size="sm">
-                <Save className="w-4 h-4 mr-2" />
-                Save Form
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-background">
+        <Header />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">Active Forms</span>
-                  </div>
-                  <Badge variant="secondary">12</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Users className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">Submissions</span>
-                  </div>
-                  <Badge variant="secondary">1,247</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <BarChart3 className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">Conversion</span>
-                  </div>
-                  <Badge variant="secondary">87%</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Zap className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">AI Optimizations</span>
-                  </div>
-                  <Badge variant="secondary">34</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold mb-2">Create New Form</h1>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">My Forms</h1>
               <p className="text-muted-foreground">
-                Build an intelligent form with AI-powered features and optimizations.
+                Manage your AI-powered forms and track their performance.
               </p>
             </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Basic Information */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="formName">Name</Label>
-                  <Input
-                    id="formName"
-                    placeholder="Contact Form"
-                    {...register("formName", { required: "Form name is required" })}
-                  />
-                  {errors.formName && <p className="text-sm text-destructive">{errors.formName.message}</p>}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Goal</Label>
-                <Textarea
-                  id="form"
-                  placeholder="What is the goal of this form?"
-                  {...register("goal")}
-                />
-              </div>
-
-
-              <div className="space-y-2">
-                <Label htmlFor="context">Context</Label>
-                <Textarea
-                  id="context"
-                  placeholder="What is the context of this form?"
-                  {...register("context")}
-                />
-              </div>
-
-              <Questions {...{ register, errors, isRevealed: false }} />
-
-              {/* Submit Button */}
-              <div className="flex justify-end space-x-4">
-                <Button type="button" variant="outline">
-                  Save as Draft
-                </Button>
-                <Button type="submit">Create Form</Button>
-              </div>
-            </form>
+            <Button asChild>
+              <Link href="/new-form">
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Form
+              </Link>
+            </Button>
           </div>
+
+          {forms.length === 0 ? (
+            <div className="text-center py-16">
+              <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No forms yet</h3>
+              <p className="text-muted-foreground mb-6">
+                Get started by creating your first AI-powered form.
+              </p>
+              <Button asChild>
+                <Link href="/new-form">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Form
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {forms.map((form) => (
+                <FormCard
+                  key={form.id}
+                  form={form}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onPreview={handlePreview}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
-    </div>
-  )
+    </ProtectedRoute>
+  );
 }
