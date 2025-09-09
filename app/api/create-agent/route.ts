@@ -8,8 +8,8 @@ export async function POST(request: NextRequest) {
     const { formName, goal, context, questions, user_id } = body;
 
     const PROMPT = `
-    You are an expert product architect and conversational AI designer. 
-    Your task is to design an AI Agent that dramatically improves the user experience of data collection. 
+    I am an event organizer trying to get feedback on the event you attended. 
+
     Objectives: 
     (1) Enhance User Experience by transforming rigid questions into interactive, multi-turn conversations (voice + text), allowing users to speak naturally and converting voice into structured data fields with sentiment analysis. 
     (2) Provide Data Insights & Analytics by automatically structuring responses into datasets, offering real-time analytics on sentiment, clarity, and drop-off points, and supporting future conversational branching. 

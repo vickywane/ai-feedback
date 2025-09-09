@@ -1,14 +1,15 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bot, Eye, Edit, Trash2, Calendar } from "lucide-react";
-import { LuLink } from "react-icons/lu";
+import { Edit, Trash2, Calendar, Share2 } from "lucide-react";
+import Link from "next/link";
+import { CiPlay1 } from "react-icons/ci";
+import toast from "react-hot-toast";
 
 interface FormData {
   id: string;
@@ -42,26 +43,37 @@ export default function FormCard({ form, onEdit, onDelete }: FormCardProps) {
       : text;
   };
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/feedback/${form.agent_id}`;
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Form link copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy link to clipboard");
+    }
+  };
+
   return (
     <Card className="border-border hover:shadow-md transition-shadow">
       <CardHeader>
         <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-2">
-            <Bot className="h-5 w-5 text-accent" />
+          <div className="flex flex-col">
+            <div className="flex items-center mb-1">
+              {form.agent_id && (
+                <Badge variant="secondary" className="text-xs">
+                  AI Enabled
+                </Badge>
+              )}
+            </div>
+
             <div>
-              <CardTitle className="text-lg">{form.name}</CardTitle>
+              <CardTitle className="text-md truncate">{form.name}</CardTitle>
               <div className="flex items-center text-sm text-muted-foreground mt-1">
                 <Calendar className="h-3 w-3 mr-1" />
                 {formatDate(form.created_at)}
               </div>
             </div>
-          </div>
-          <div className="flex items-center space-x-1">
-            {form.agent_id && (
-              <Badge variant="secondary" className="text-xs">
-                AI Enabled
-              </Badge>
-            )}
           </div>
         </div>
       </CardHeader>
@@ -95,12 +107,23 @@ export default function FormCard({ form, onEdit, onDelete }: FormCardProps) {
               </Button>
             )}
 
-            <a href={`https://elevenlabs.io/app/talk-to?agent_id=${form.agent_id}`} target="_blank" rel="noopener noreferrer">
+            <Link href={`/dashboard/playground/${form.agent_id}`}>
               <Button size="sm" variant="outline">
-                <LuLink className="h-3 w-3 mr-1" />
+                <CiPlay1 className="h-3 w-3 mr-1" />
+                Test
+              </Button>
+            </Link>
+
+            {form.agent_id && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleShare}
+              >
+                <Share2 className="h-3 w-3 mr-1" />
                 Share
               </Button>
-            </a>
+            )}
           </div>
           {onDelete && (
             <Button

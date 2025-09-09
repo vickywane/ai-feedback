@@ -129,12 +129,6 @@ export async function generateFormQuestions(
     }
   );
 
-  console.log(
-    "response:",
-
-    completion.choices[0].message.content
-  );
-
   const data = convertToJSON(
     completion.choices[0].message.content as unknown as string
   );
@@ -163,19 +157,25 @@ Please analyze the conversation and provide answers to each question based on wh
     [{ role: "user", content: prompt }],
     {
       ...options,
-      systemPrompt:
-        options.systemPrompt ||
-        "You are an expert conversation analyst. Extract accurate answers to questions from conversation transcripts. Be precise and only use information that is clearly stated or strongly implied in the conversation.",
-      temperature: options.temperature ?? 0,
-      maxTokens: options.maxTokens ?? 4096,
-      responseFormat: {
-        schema: QuestionAnswerPairsSchema,
-        name: "question_answer_pairs",
-      },
+      systemPrompt: `
+        You are an expert conversation analyst. Extract accurate answers to questions from conversation transcripts. Be precise and only use information that is clearly stated or strongly implied in the conversation.
+        Your response must be a valid JSON object with an array, each item in the array should contain a single answered question from the transcript e.g [{}, {}]
+       `,
+      // responseFormat: {
+      //   schema: QuestionAnswerPairsSchema,
+      //   name: "question_answer_pairs",
+      // },
     }
   );
 
-  return completion.choices[0].message.parsed!;
+  // return completion.choices[0].message.parsed!;
+  const data = convertToJSON(
+    completion.choices[0].message.content as unknown as string
+  );
+
+  console.log("Extracted Q&A Pairs:", data);
+
+  return data;
 }
 
 export { OpenAI, z, zodResponseFormat, createChatCompletion };

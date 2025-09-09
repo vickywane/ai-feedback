@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronDown, ChevronRight, Settings } from "lucide-react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { FormData } from "@/app/new-form/page";
+import { FormData } from "@/app/dashboard/new-form/page";
 
 interface QuestionsProps {
   register: UseFormRegister<FormData>;
